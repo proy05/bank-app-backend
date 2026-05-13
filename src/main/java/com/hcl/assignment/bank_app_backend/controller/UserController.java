@@ -1,9 +1,8 @@
 package com.hcl.assignment.bank_app_backend.controller;
 
-import com.hcl.assignment.bank_app_backend.dto.ExistingUserAccountCreationRequestDto;
-import com.hcl.assignment.bank_app_backend.dto.UserAccountCreationDto;
-import com.hcl.assignment.bank_app_backend.dto.UserRegistrationRequestDto;
+import com.hcl.assignment.bank_app_backend.dto.*;
 import com.hcl.assignment.bank_app_backend.model.AccountType;
+import com.hcl.assignment.bank_app_backend.service.TransactionService;
 import com.hcl.assignment.bank_app_backend.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -14,15 +13,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 public class UserController {
 
     private final UserService userService;
 
+    private final TransactionService transactionService;
+
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, TransactionService transactionService) {
         this.userService = userService;
+        this.transactionService = transactionService;
     }
 
     /**
@@ -44,6 +48,7 @@ public class UserController {
                 )
         );
     }
+
     /**
      * Create a new account for an existing user
      */
@@ -61,9 +66,25 @@ public class UserController {
                         userAccountCreationDto.accountNumber()
                 )
         );
-
     }
 
+    /**
+     * Transfer funds from one account to another
+     */
+    @PostMapping("/transactions/transfers")
+    public ResponseEntity<String> transferFunds(@Valid @RequestBody TransferRequestDto transferRequestDto) {
+        transactionService.transferFunds(transferRequestDto);
+        return ResponseEntity.ok("Transfer successful");
+    }
+
+    @PostMapping("/statement")
+    public ResponseEntity<List<AccountStatementEntryDto>> getMonthlyStatement(
+            @Valid @RequestBody AccountStatementRequestDto accountStatementRequestDto) {
+
+        List<AccountStatementEntryDto> statement = transactionService.getMonthlyStatement(accountStatementRequestDto);
+
+        return ResponseEntity.ok(statement);
+    }
 
 
 

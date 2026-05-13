@@ -12,7 +12,7 @@ public class Account {
     @Column(name = "id")
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 12)
+    @Column(name="account_number", unique = true, nullable = false, length = 12)
     private String accountNumber;
 
     @Column(name = "account_type")
