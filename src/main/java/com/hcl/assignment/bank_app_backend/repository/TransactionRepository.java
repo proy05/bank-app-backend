@@ -1,6 +1,8 @@
 package com.hcl.assignment.bank_app_backend.repository;
 
 import com.hcl.assignment.bank_app_backend.model.Transaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,8 +22,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         AND t.timestamp BETWEEN :startDate AND :endDate 
         ORDER BY t.timestamp DESC
     """)
-    List<Transaction> findTransactionsForPeriodByAccountNumber(
+    Page<Transaction> findTransactionsForPeriodByAccountNumber(
             @Param(value="accountNumber") String accountNumber,
             @Param(value="startDate") LocalDateTime startDate,
-            @Param(value="endDate") LocalDateTime endDate);
+            @Param(value="endDate") LocalDateTime endDate,
+            Pageable pageable);  //Controls LIMIT and OFFSET
 }

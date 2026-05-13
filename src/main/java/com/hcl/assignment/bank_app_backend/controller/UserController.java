@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -77,11 +78,14 @@ public class UserController {
         return ResponseEntity.ok("Transfer successful");
     }
 
-    @PostMapping("/statement")
-    public ResponseEntity<List<AccountStatementEntryDto>> getMonthlyStatement(
-            @Valid @RequestBody AccountStatementRequestDto accountStatementRequestDto) {
+    @PostMapping("/statement/view")
+    public ResponseEntity<Page<AccountStatementEntryDto>> getMonthlyStatement(
+            @Valid @RequestBody AccountStatementRequestDto accountStatementRequestDto,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<AccountStatementEntryDto> statement = transactionService.getMonthlyStatement(accountStatementRequestDto);
+        Page<AccountStatementEntryDto> statement = transactionService.getMonthlyStatement(
+                accountStatementRequestDto, page, size);
 
         return ResponseEntity.ok(statement);
     }

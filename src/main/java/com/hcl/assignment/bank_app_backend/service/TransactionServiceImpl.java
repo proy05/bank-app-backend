@@ -10,6 +10,10 @@ import com.hcl.assignment.bank_app_backend.repository.AccountRepository;
 import com.hcl.assignment.bank_app_backend.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -63,7 +67,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<AccountStatementEntryDto> getMonthlyStatement(AccountStatementRequestDto accountStatementRequestDto) {
+    public Page<AccountStatementEntryDto> getMonthlyStatement(AccountStatementRequestDto accountStatementRequestDto,
+                                                              int page, int size) {
 
         String accountNumber = accountStatementRequestDto.accountNumber();
         int month = accountStatementRequestDto.month();
@@ -78,11 +83,12 @@ public class TransactionServiceImpl implements TransactionService {
         LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusDays(1);
 
         // 3. Fetch transactions from the repository
-        List<Transaction> transactions = transactionRepository.findTransactionsForPeriodByAccountNumber(
-                account.getAccountNumber(), startOfMonth, endOfMonth);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        Page<Transaction> transactionsPage = transactionRepository.findTransactionsForPeriodByAccountNumber(
+                account.getAccountNumber(), startOfMonth, endOfMonth, pageable);
 
         // 4. Map transactions to Statement DTOs
-        return transactions.stream().map(t -> {
+        return transactionsPage.map(t -> {
             boolean isDebit = t.getFromAccount().getAccountNumber().equals(accountNumber);
 
             return new AccountStatementEntryDto(
@@ -92,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService {
                     isDebit ? TransactionType.DEBIT : TransactionType.CREDIT,
                     isDebit ? t.getToAccount().getAccountNumber() : t.getFromAccount().getAccountNumber()
             );
-        }).toList();
+        });
     }
 
 }
