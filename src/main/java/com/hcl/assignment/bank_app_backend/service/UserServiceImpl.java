@@ -1,8 +1,10 @@
 package com.hcl.assignment.bank_app_backend.service;
 
-import com.hcl.assignment.bank_app_backend.dto.UserAccountDto;
+import com.hcl.assignment.bank_app_backend.dto.UserAccountResponseDto;
 import com.hcl.assignment.bank_app_backend.dto.UserRegistrationRequestDto;
+import com.hcl.assignment.bank_app_backend.dto.UserResponseDto;
 import com.hcl.assignment.bank_app_backend.exception.UserAlreadyExistsException;
+import com.hcl.assignment.bank_app_backend.exception.UserNotFoundException;
 import com.hcl.assignment.bank_app_backend.model.Account;
 import com.hcl.assignment.bank_app_backend.model.AccountType;
 import com.hcl.assignment.bank_app_backend.model.User;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -32,7 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserAccountDto saveNewUser(UserRegistrationRequestDto userRegistrationRequestDto) {
+    public UserAccountResponseDto saveNewUser(UserRegistrationRequestDto userRegistrationRequestDto) {
         //check the user pan and email are unique
         if(userRepository.existsByEmail(userRegistrationRequestDto.email())){
             throw new UserAlreadyExistsException("User already exists with email " +
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
         Account account = createAccount(userRegistrationRequestDto.accountType(), savedUser);
 
         //Success - return account number
-        return new UserAccountDto(account.getAccountNumber(),
+        return new UserAccountResponseDto(account.getAccountNumber(),
                 account.getAccountType(),
                 account.getBalance(),
                 savedUser.getId()
@@ -97,7 +98,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserAccountDto createAccountForExistingUser(Long userId, AccountType accountType) {
+    public UserAccountResponseDto createAccountForExistingUser(Long userId, AccountType accountType) {
         //Find the User by userId, Else throw exception
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User id " +
                 userId + "not found"));
@@ -106,7 +107,7 @@ public class UserServiceImpl implements UserService {
         Account account = createAccount(accountType, user);
 
         //Success - return account number
-        return new UserAccountDto(account.getAccountNumber(),
+        return new UserAccountResponseDto(account.getAccountNumber(),
                 accountType,
                 account.getBalance(),
                 user.getId()
@@ -114,14 +115,45 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserAccountDto> getUserAccounts(Long userId) {
+    public List<UserAccountResponseDto> getUserAccounts(Long userId) {
         User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User id " + userId + " not found"));
-        return user.getAccounts().stream().map( account -> new UserAccountDto(
+        return user.getAccounts().stream().map( account -> new UserAccountResponseDto(
                 account.getAccountNumber(),
                 account.getAccountType(),
                 account.getBalance(),
                 user.getId())).toList();
+    }
+
+    @Override
+    public UserResponseDto findUserById(Long userId) {
+         User user = userRepository.findById(userId)
+                 .orElseThrow(()-> new UserNotFoundException("User id " + userId + " not found"));
+
+        return new UserResponseDto(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getGender(),
+                user.getEmail(),
+                user.getPanNumber(),
+                user.getDateOfBirth()
+        );
+
+    }
+
+    @Override
+    public List<UserResponseDto> findAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map( user -> new UserResponseDto(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getGender(),
+                user.getEmail(),
+                user.getPanNumber(),
+                user.getDateOfBirth()
+        )).toList();
     }
 
     public String generateAccountNumber() {

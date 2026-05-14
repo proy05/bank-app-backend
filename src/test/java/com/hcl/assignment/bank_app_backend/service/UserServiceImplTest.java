@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.hcl.assignment.bank_app_backend.dto.UserAccountDto;
+import com.hcl.assignment.bank_app_backend.dto.UserAccountResponseDto;
 import com.hcl.assignment.bank_app_backend.dto.UserRegistrationRequestDto;
 import com.hcl.assignment.bank_app_backend.exception.UserAlreadyExistsException;
 import com.hcl.assignment.bank_app_backend.model.*;
@@ -85,7 +84,7 @@ class UserServiceImplTest {
         when(accountRepository.existsByAccountNumber(anyString())).thenReturn(false);
         when(accountRepository.save(any(Account.class))).thenReturn(account);
 
-        UserAccountDto result = userService.saveNewUser(dto);
+        UserAccountResponseDto result = userService.saveNewUser(dto);
 
         assertNotNull(result);
         assertEquals("123456789012", result.accountNumber());

@@ -31,12 +31,12 @@ public class UserController {
      * Create a new user and their account according to the type of account requested
      */
     @PostMapping("/users")
-    public ResponseEntity<String> signup(@RequestBody UserRegistrationRequestDto userRegistrationRequestDto) {
+    public ResponseEntity<String> signUp(@RequestBody UserRegistrationRequestDto userRegistrationRequestDto) {
 
         if(!userRegistrationRequestDto.hasMinimumAge(18)){
             return new ResponseEntity<>("User must be at least 18 years old", HttpStatus.BAD_REQUEST);
         }
-        UserAccountDto userAccountCreationDto = userService.saveNewUser(userRegistrationRequestDto);
+        UserAccountResponseDto userAccountCreationDto = userService.saveNewUser(userRegistrationRequestDto);
 
         return ResponseEntity.ok(String.format(
                         "User id %d created successfully. Account number of %s account is %s. " +
@@ -49,6 +49,20 @@ public class UserController {
         );
     }
 
+    @GetMapping("/users")
+    public ResponseEntity<List<UserResponseDto>> getAllUserDetails(){
+        List<UserResponseDto> allUsers = userService.findAllUsers();
+        return new ResponseEntity<>(allUsers, HttpStatus.OK);
+
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserResponseDto> getUserDetails(@PathVariable Long userId){
+        UserResponseDto userResponseDto = userService.findUserById(userId);
+        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
+
+    }
+
     /**
      * Create a new account for an existing user
      */
@@ -56,7 +70,7 @@ public class UserController {
     public ResponseEntity<String> createAccountForExistingUser(@PathVariable Long userId,
                                                                @Valid @RequestBody
                                                                ExistingUserAccountCreationRequestDto existingUserAccountCreationRequestDto){
-        UserAccountDto userAccountCreationDto = userService.createAccountForExistingUser(userId,
+        UserAccountResponseDto userAccountCreationDto = userService.createAccountForExistingUser(userId,
                 existingUserAccountCreationRequestDto.accountType());
 
         return ResponseEntity.ok(String.format(
@@ -74,8 +88,8 @@ public class UserController {
      * Get all accounts of a given user
      */
     @GetMapping("/users/{userId}/accounts")
-    public ResponseEntity<List<UserAccountDto>> getUserAccounts(@PathVariable Long userId){
-        List<UserAccountDto> userAccountDtos = userService.getUserAccounts(userId);
+    public ResponseEntity<List<UserAccountResponseDto>> getUserAccounts(@PathVariable Long userId){
+        List<UserAccountResponseDto> userAccountDtos = userService.getUserAccounts(userId);
         return ResponseEntity.ok(userAccountDtos);
     }
 
