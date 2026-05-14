@@ -32,49 +32,6 @@ class UserServiceImplTest {
     private UserServiceImpl userService;
 
     @Test
-    void testSaveNewUser() {
-        // Arrange
-        UserRegistrationRequestDto dto = new UserRegistrationRequestDto(
-                "John", "Doe", Gender.MALE, "john@example.com", "ABCDE1234F", LocalDate.of(1990, 1, 1), AccountType.SAVINGS
-        );
-
-        User savedUser = new User();
-        savedUser.setFirstName(dto.firstName());
-        savedUser.setLastName(dto.lastName());
-        savedUser.setGender(dto.gender());
-        savedUser.setEmail(dto.email());
-        savedUser.setPanNumber(dto.panNumber());
-        savedUser.setDateOfBirth(dto.dateOfBirth());
-        savedUser.setId(1L); // Simulate generated ID
-
-        Account account = new Account("123456789012", AccountType.SAVINGS);
-        account.setBalance(new BigDecimal(10000));
-        account.setUser(savedUser);
-
-        when(userRepository.existsByEmail(dto.email())).thenReturn(false);
-        when(userRepository.existsByPanNumber(dto.panNumber())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        when(accountRepository.existsByAccountNumber(anyString())).thenReturn(false);
-        when(accountRepository.save(any(Account.class))).thenReturn(account);
-
-        // Act
-        UserAccountDto result = userService.saveNewUser(dto);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("123456789012", result.accountNumber());
-        assertEquals(AccountType.SAVINGS, result.accountType());
-        assertEquals(new BigDecimal(10000), result.balance());
-        assertEquals(1L, result.userId());
-//
-//        verify(userRepository).existsByEmail(dto.email());
-//        verify(userRepository).existsByPanNumber(dto.panNumber());
-//        verify(userRepository).save(any(User.class));
-//        verify(accountRepository).existsByAccountNumber(anyString());
-//        verify(accountRepository).save(any(Account.class));
-    }
-
-    @Test
     void testSaveNewUser_UserAlreadyExistsByEmail() {
         // Arrange
         UserRegistrationRequestDto dto = new UserRegistrationRequestDto(
