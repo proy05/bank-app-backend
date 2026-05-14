@@ -1,6 +1,6 @@
 package com.hcl.assignment.bank_app_backend.service;
 
-import com.hcl.assignment.bank_app_backend.dto.UserAccountCreationDto;
+import com.hcl.assignment.bank_app_backend.dto.UserAccountDto;
 import com.hcl.assignment.bank_app_backend.dto.UserRegistrationRequestDto;
 import com.hcl.assignment.bank_app_backend.exception.UserAlreadyExistsException;
 import com.hcl.assignment.bank_app_backend.model.Account;
@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -28,7 +30,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserAccountCreationDto saveNewUser(UserRegistrationRequestDto userRegistrationRequestDto) {
+    public UserAccountDto saveNewUser(UserRegistrationRequestDto userRegistrationRequestDto) {
         //check the user pan and email are unique
         if(userRepository.existsByEmail(userRegistrationRequestDto.email())){
             throw new UserAlreadyExistsException("User already exists with email " +
@@ -46,12 +48,14 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         //Create and save the Account for this User
-        String accountNumber = createAccount(userRegistrationRequestDto.accountType(), user);
+        Account account = createAccount(userRegistrationRequestDto.accountType(), user);
 
         //Success - return account number
-        return new UserAccountCreationDto(accountNumber,
-                userRegistrationRequestDto.accountType(),
-                user.getId()) ;
+        return new UserAccountDto(account.getAccountNumber(),
+                account.getAccountType(),
+                account.getBalance(),
+                user.getId()
+        ) ;
 
     }
 
@@ -59,7 +63,7 @@ public class UserServiceImpl implements UserService {
      * Create and saves an account for a given user and given account type
      */
     @Override
-    public String createAccount(AccountType accountType,
+    public Account createAccount(AccountType accountType,
                               User user) {
 
         //Generate a unique 12-digit account number
@@ -81,23 +85,36 @@ public class UserServiceImpl implements UserService {
         //Save the Account
         accountRepository.save(account);
 
-        return accountNumber;
+        return account;
 
     }
 
     @Override
-    public UserAccountCreationDto createAccountForExistingUser(Long userId, AccountType accountType) {
+    public UserAccountDto createAccountForExistingUser(Long userId, AccountType accountType) {
         //Find the User by userId, Else throw exception
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User id " +
                 userId + "not found"));
 
         //Generate a unique 12-digit account number
-        String accountNumber = createAccount(accountType, user);
+        Account account = createAccount(accountType, user);
 
         //Success - return account number
-        return new UserAccountCreationDto(accountNumber,
+        return new UserAccountDto(account.getAccountNumber(),
                 accountType,
-                user.getId()) ;
+                account.getBalance(),
+                user.getId()
+        ) ;
+    }
+
+    @Override
+    public List<UserAccountDto> getUserAccounts(Long userId) {
+        User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User id " + userId + "not found"));
+        return user.getAccounts().stream().map( account -> new UserAccountDto(
+                account.getAccountNumber(),
+                account.getAccountType(),
+                account.getBalance(),
+                user.getId())).toList();
     }
 
     public String generateAccountNumber() {

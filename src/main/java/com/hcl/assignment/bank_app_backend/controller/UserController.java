@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1")
@@ -34,13 +36,15 @@ public class UserController {
         if(!userRegistrationRequestDto.hasMinimumAge(18)){
             return new ResponseEntity<>("User must be at least 18 years old", HttpStatus.BAD_REQUEST);
         }
-        UserAccountCreationDto userAccountCreationDto = userService.saveNewUser(userRegistrationRequestDto);
+        UserAccountDto userAccountCreationDto = userService.saveNewUser(userRegistrationRequestDto);
 
         return ResponseEntity.ok(String.format(
-                        "User id %d created successfully. Account number of %s account is %s",
+                        "User id %d created successfully. Account number of %s account is %s. " +
+                                "Opening Balance is Rs %.2f",
                         userAccountCreationDto.userId(),
                         userAccountCreationDto.accountType(),
-                        userAccountCreationDto.accountNumber()
+                        userAccountCreationDto.accountNumber(),
+                        userAccountCreationDto.balance().doubleValue()
                 )
         );
     }
@@ -52,16 +56,27 @@ public class UserController {
     public ResponseEntity<String> createAccountForExistingUser(@PathVariable Long userId,
                                                                @Valid @RequestBody
                                                                ExistingUserAccountCreationRequestDto existingUserAccountCreationRequestDto){
-        UserAccountCreationDto userAccountCreationDto = userService.createAccountForExistingUser(userId,
+        UserAccountDto userAccountCreationDto = userService.createAccountForExistingUser(userId,
                 existingUserAccountCreationRequestDto.accountType());
 
         return ResponseEntity.ok(String.format(
-                        "%s account created for user id %d. Account number is %s",
+                        "%s account created for user id %d. Account number is %s" +
+                                "Opening Balance is Rs %.2f",
                         userAccountCreationDto.accountType(),
                         userAccountCreationDto.userId(),
-                        userAccountCreationDto.accountNumber()
+                        userAccountCreationDto.accountNumber(),
+                        userAccountCreationDto.balance().doubleValue()
                 )
         );
+    }
+
+    /**
+     * Get all accounts of a given user
+     */
+    @GetMapping("/users/{userId}/accounts")
+    public ResponseEntity<List<UserAccountDto>> getUserAccounts(@PathVariable Long userId){
+        List<UserAccountDto> userAccountDtos = userService.getUserAccounts(userId);
+        return ResponseEntity.ok(userAccountDtos);
     }
 
     /**
