@@ -8,6 +8,7 @@ import com.hcl.assignment.bank_app_backend.model.AccountType;
 import com.hcl.assignment.bank_app_backend.model.User;
 import com.hcl.assignment.bank_app_backend.repository.AccountRepository;
 import com.hcl.assignment.bank_app_backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserAccountDto saveNewUser(UserRegistrationRequestDto userRegistrationRequestDto) {
         //check the user pan and email are unique
         if(userRepository.existsByEmail(userRegistrationRequestDto.email())){
@@ -45,16 +47,16 @@ public class UserServiceImpl implements UserService {
         //Create and save the User
         User user = new User();
         BeanUtils.copyProperties(userRegistrationRequestDto, user);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);  //using savedUser is safer
 
         //Create and save the Account for this User
-        Account account = createAccount(userRegistrationRequestDto.accountType(), user);
+        Account account = createAccount(userRegistrationRequestDto.accountType(), savedUser);
 
         //Success - return account number
         return new UserAccountDto(account.getAccountNumber(),
                 account.getAccountType(),
                 account.getBalance(),
-                user.getId()
+                savedUser.getId()
         ) ;
 
     }
@@ -82,10 +84,15 @@ public class UserServiceImpl implements UserService {
         //Associate the User with the Account
         account.setUser(user);
 
-        //Save the Account
-        accountRepository.save(account);
+//        if(1==1){
+//            //Simulate an exception to test transaction rollback
+//            throw new RuntimeException("Simulated exception to test transaction rollback");
+//        }
 
-        return account;
+        //Save the Account
+        Account savedAccount = accountRepository.save(account);  //safer to use the saved object
+
+        return savedAccount;
 
     }
 
