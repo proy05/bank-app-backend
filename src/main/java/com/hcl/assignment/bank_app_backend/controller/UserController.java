@@ -60,7 +60,7 @@ public class UserController {
                 existingUserAccountCreationRequestDto.accountType());
 
         return ResponseEntity.ok(String.format(
-                        "%s account created for user id %d. Account number is %s" +
+                        "%s account created for user id %d. Account number is %s. " +
                                 "Opening Balance is Rs %.2f",
                         userAccountCreationDto.accountType(),
                         userAccountCreationDto.userId(),
