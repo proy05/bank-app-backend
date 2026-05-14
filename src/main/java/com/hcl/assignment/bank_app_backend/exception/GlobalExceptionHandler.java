@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles @NotNull validation errors on method parameters
+     * Handles @NotNull @NotBlank validation errors on any method parameters
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleConstraintViolation(ConstraintViolationException ex) {
@@ -64,11 +64,11 @@ public class GlobalExceptionHandler {
     /**
      * Handles Database Unique Constraint violations (e.g., Duplicate Email)
      */
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponseDto> handleDataIntegrity(DataIntegrityViolationException ex) {
+    @ExceptionHandler({DataIntegrityViolationException.class, UserAlreadyExistsException.class})
+    public ResponseEntity<ErrorResponseDto> handleDataIntegrity(RuntimeException ex) {
         ErrorResponseDto response = new ErrorResponseDto(
                 HttpStatus.CONFLICT.value(),
-                "Database error: Possible duplicate entry or constraint violation.",
+                ex.getMessage(),
                 null
         );
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
