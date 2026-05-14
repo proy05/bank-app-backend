@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserAccountDto> getUserAccounts(Long userId) {
         User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User id " + userId + "not found"));
+                    .orElseThrow(() -> new RuntimeException("User id " + userId + " not found"));
         return user.getAccounts().stream().map( account -> new UserAccountDto(
                 account.getAccountNumber(),
                 account.getAccountType(),
