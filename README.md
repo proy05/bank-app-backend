@@ -1,6 +1,6 @@
 # Bank App Backend
 
-A comprehensive Spring Boot REST API banking application backend that enables user registration, account management, fund transfers, and statement generation.
+A comprehensive Spring Boot REST API based banking application backend that enables user registration, account management, fund transfers, and statement generation.
 
 ## Overview
 

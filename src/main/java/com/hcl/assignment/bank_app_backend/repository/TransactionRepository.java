@@ -20,7 +20,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         SELECT t FROM Transaction t 
         WHERE (t.fromAccount.accountNumber = :accountNumber OR t.toAccount.accountNumber = :accountNumber)
         AND t.timestamp BETWEEN :startDate AND :endDate 
-        ORDER BY t.timestamp DESC
     """)
     Page<Transaction> findTransactionsForPeriodByAccountNumber(
             @Param(value="accountNumber") String accountNumber,
