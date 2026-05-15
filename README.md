@@ -29,3 +29,30 @@ and unit testing with Junit/Mockito.
 - **Jakarta/Hibernate Validation** for Bean validation and constraint annotations
 - **JUnit & Mockito** for Unit testing and Mocking framework for unit testing
 - **REST APIs** – RESTful endpoint design with HTTP status codes and pagination 
+
+## API Endpoints
+
+### User Management
+- `POST /api/v1/users` – Register a new user with account creation
+- `GET /api/v1/users` – Retrieve all users
+- `GET /api/v1/users/{userId}` – Retrieve specific user details
+- `POST /api/v1/users/{userId}/accounts` – Create additional account for existing user
+- `GET /api/v1/users/{userId}/accounts` – Retrieve all accounts of a user
+
+### Transactions
+- `POST /api/v1/transactions/transfers` – Transfer funds between accounts
+- `POST /api/v1/statement/view` – View paginated account statement for a specific month
+
+## Getting Started
+
+### Prerequisites
+- Java 21 JDK
+- Maven 3.6+
+- PostgreSQL 12+
+
+### Installation & Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd bank-app-backend
