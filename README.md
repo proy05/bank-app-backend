@@ -12,7 +12,7 @@ and unit testing with Junit/Mockito.
 
 ## Key Features
 
-- **User Management**: Register new users with validation and account creation
+- **User Management**: Register new users with validation and account creation, view and manage users and their accounts 
 - **Multiple Account Types**: Support for Savings and Current accounts
 - **Fund Transfers**: Transfer funds between different accounts with transaction tracking
 - **Account Statements**: Generate paginated monthly account statements
